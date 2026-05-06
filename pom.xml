@@ -8,7 +8,7 @@
         <version>3.5.8</version>
         <relativePath />
     </parent>
-	<groupId>edu.kit.iai.webis</groupId>
+	<groupId>edu.kit.iai.webis.proof</groupId>
 	<artifactId>proof-utils</artifactId>
 	<version>4.4.13</version>
 	<properties>
@@ -87,9 +87,9 @@
 	</build>
 	<distributionManagement>
 		<repository>
-			<id>iai-artifactory</id>
-			<name>iai-artifactory</name>
-			<url>https://iai-artifactory.iai.kit.edu/artifactory/webis-common</url>
+			<id>github</id>
+			<name>github-packages</name>
+			<url>https://maven.pkg.github.com/KIT-IAI-PROOF/proof-utils</url>
 		</repository>
 	</distributionManagement>
 </project>
