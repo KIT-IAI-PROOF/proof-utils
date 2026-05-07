@@ -48,8 +48,8 @@
 	</dependencies>
 	<repositories>
 		<repository>
-			<id>iai-artifactory</id>
-			<url>https://iai-artifactory.iai.kit.edu/artifactory/webis/</url>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/KIT-IAI-PROOF</url>
 		</repository>
 	</repositories>
 	<build>
