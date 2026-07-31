@@ -112,7 +112,12 @@ public enum SimulationStatus {
      * but the worker is not yet able to work, because he still lacks information or data.
      * Then the worker sends a notify message with the status RETRY back to the orchestrator, which means that the
      * worker is ready for receiving the same sync message.	 */
-	RETRY;
+	RETRY,
+
+	/**
+	 * the wrapper uses this status to notify the worker that the (init) values are set
+	 */
+	VALUES_SET;
 
 
 }
