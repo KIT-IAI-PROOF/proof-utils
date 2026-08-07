@@ -5,6 +5,7 @@
 package edu.kit.iai.webis.proofutils.wrapper;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,6 @@ public class Block implements IWrapper<BlockDetail> {
 	private BlockDetail blockDetail;
 
 	private SimulationStatus status = SimulationStatus.CREATED;
-	private String index;
 	private Map<String, Input> inputs;
 	private Map<String, Output> outputs;
 	private InterfaceType interfaceType;
@@ -52,8 +52,8 @@ public class Block implements IWrapper<BlockDetail> {
 	private SyncStrategy syncStrategy;
 
 	private final List<Input> requiredDynamicInputs;
-
-	private boolean blockHasDynamicInputs = false;
+	private final List<Input> allDynamicInputs;
+	private final List<Input> allStaticInputs;
 
 	private Program program;
 
@@ -71,12 +71,22 @@ public class Block implements IWrapper<BlockDetail> {
 		this.getInputs();
 		this.getOutputs();
 		this.createIONameMappings();
-		this.blockHasDynamicInputs = this.inputs.values().stream()
-        		.anyMatch( (input) -> ( input.getCommunicationType() == CommunicationType.STEPBASED || input.getCommunicationType() == CommunicationType.EVENT ) );
-		this.requiredDynamicInputs = this.inputs.values().stream()
-				.filter((input) -> (input.getCommunicationType() == CommunicationType.STEPBASED
-						|| input.getCommunicationType() == CommunicationType.EVENT) && input.isRequired())
-				.collect(Collectors.toList());
+		this.requiredDynamicInputs = new ArrayList<Input>();
+		this.allStaticInputs = new ArrayList<Input>();
+		this.allDynamicInputs = new ArrayList<Input>();
+
+		this.inputs.values().forEach(input -> {
+			if( input.getCommunicationType() == CommunicationType.STEPBASED || input.getCommunicationType() == CommunicationType.EVENT ) {
+				this.allDynamicInputs.add(input);
+				if( input.isRequired() ) {
+					this.requiredDynamicInputs.add(input);
+				}
+			}
+			else {
+				this.allStaticInputs.add(input);
+			}
+		});
+
 		this.syncStrategy = EnumMapper.getSyncStrategyFor( this.blockDetail.getSyncStrategy() );
 	}
 
@@ -314,7 +324,7 @@ public class Block implements IWrapper<BlockDetail> {
      * @return true, if the block has dynamic inputs, false, if not
      */
     public boolean hasDynamicInputs() {
-    	return this.blockHasDynamicInputs;
+    	return this.allDynamicInputs.size() > 0;
     }
 
     /**
@@ -323,23 +333,23 @@ public class Block implements IWrapper<BlockDetail> {
      * @return the list of dynamic inputs
      */
     public List<Input> getDynamicInputs() {
-    	return this.inputs.values().stream()
-    		.filter( (input) -> ( input.getCommunicationType() == CommunicationType.STEPBASED || input.getCommunicationType() == CommunicationType.EVENT ) )
-    		.collect( Collectors.toList() );
+    	return this.allDynamicInputs;
     }
 
     /**
-     * get the number of dynamic (i.e. non-static) inputs from one block
+     * get the static inputs of a block
      *
-     * @return the number of dynamic inputs
-     *  <br><b>Note: </b> this method uses {@link #getDynamicInputs()}
+     * @return the list of static inputs
      */
-    public int getNumberOfDynamicInputs() {
-    	return this.getDynamicInputs().size();
+    public List<Input> getStaticInputs() {
+    	return this.allStaticInputs;
     }
 
+    /**
+     * get the {@link SyncStrategy} for this block
+     * @return the {@link SyncStrategy} for this block
+     */
     public SyncStrategy getSyncStrategy() {
 		return this.syncStrategy;
-	}
-
+    }
 }

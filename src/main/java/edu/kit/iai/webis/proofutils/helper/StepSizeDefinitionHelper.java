@@ -62,14 +62,14 @@ public class StepSizeDefinitionHelper {
      * simulation, i.e. if the current communication point becomes greater than the end point
      */
 	public boolean canPerformStep( Integer communicationPoint ) throws CannotPerformStepException {
-		Objects.requireNonNullElse(communicationPoint, 0);
+		Objects.requireNonNullElse(communicationPoint, 1);
 		if( communicationPoint.compareTo(this.endPoint) > 0 ) {
 			throw new CannotPerformStepException("CP %d is greater than endPoint %d! ".formatted(communicationPoint, this.endPoint));
 		}
         else if( this.relevantCommunicationPoints == null ) {
         	this.createRelevantStepSizeArray( this.startPoint, this.endPoint );
         }
-        return  this.relevantCommunicationPoints[ communicationPoint ];
+        return  this.relevantCommunicationPoints[ communicationPoint-1 ];
     }
 
     /**
@@ -102,7 +102,7 @@ public class StepSizeDefinitionHelper {
 			stepSizes = this.stepSizeDefinition.getStepSizes();
 		}
 
-		Arrays.fill(  this.relevantCommunicationPoints, startPoint, numberOfCommunicationPoints, false);
+		Arrays.fill( this.relevantCommunicationPoints, false);
 
 		// If there are no stepSizes: use the default step size (this.communicationStepSize)
 		if( stepSizes == null || stepSizes.isEmpty() ){
