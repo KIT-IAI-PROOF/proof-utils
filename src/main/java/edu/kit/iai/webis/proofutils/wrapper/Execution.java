@@ -8,9 +8,9 @@ import java.time.Instant;
 import java.util.Map;
 
 import edu.kit.iai.webis.proofmodels.ExecutionDetail;
-import edu.kit.iai.webis.proofutils.model.SimulationStatus;
 import edu.kit.iai.webis.proofutils.model.InterfaceType;
 import edu.kit.iai.webis.proofutils.model.ProcessEnvironment;
+import edu.kit.iai.webis.proofutils.model.SimulationStatus;
 
 /**
  * Wrapper class to provide an Execution element stored in the configuration database
@@ -41,8 +41,16 @@ public class Execution implements IWrapper<ExecutionDetail> {
 		return this.executionId;
 	}
 
-	public Map<String, String> getAppliedInputs() {
-		return this.executionDetail.getAppliedInputs();
+	public Map<String, String> getExecParameters() {
+		return this.executionDetail.getExecParameters();
+	}
+
+	public Map<String, String> getExecStartValues() {
+		return this.executionDetail.getExecStartValues();
+	}
+
+	public Map<String, String> getExecDefaultValues() {
+		return this.executionDetail.getExecDefaultValues();
 	}
 
 	@Override

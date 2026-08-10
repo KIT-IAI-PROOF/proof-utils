@@ -45,6 +45,7 @@ public class LoggingHelper {
 
     private static boolean logSourcePosition = false;
     private static boolean printColor = true;
+    private static final String MDC_SIMPLIFIED_FORMAT = "simplifiedFormat";
 
     /**
      * Log an info message
@@ -102,6 +103,31 @@ public class LoggingHelper {
      */
     public static void logSourcePosition( boolean log ) {
     	logSourcePosition = log;
+    }
+
+    /**
+     * Set the MDC key "simplifiedFormat" to enable simple message format logging.
+     * When set to "true", log messages will be output with only the message text
+     * (no timestamp, log level, or logger name) based on the logback.xml configuration.
+     * <br><br>
+     * This requires the logback.xml to have appenders configured with MDCValueFilter
+     * for the "simplifiedFormat" key (see proof-worker/src/main/resources/logback.xml).
+     * <br><br>
+     * Usage example:
+     * <pre>{@code
+     * // Enable simple format temporarily
+     * LoggingHelper.setSimplifiedFormat(true);
+     * LoggingHelper.info().log("Just the message without full SLF4J format");
+     * LoggingHelper.setSimplifiedFormat(false);
+     * }</pre>
+     * @param useSimplified if "true", use simple message format; if "false" or null, use full format
+     */
+    public static void setSimplifiedFormat( boolean useSimplified ) {
+    	if (useSimplified) {
+    		MDC.put(MDC_SIMPLIFIED_FORMAT, "true");
+    	} else {
+    		MDC.remove(MDC_SIMPLIFIED_FORMAT);
+    	}
     }
 
     /**
@@ -256,7 +282,7 @@ public class LoggingHelper {
     	private Exception exception;
     	private IMessage messageObject;
 
-    	/**
+		/**
     	 * set the log level (see org.slf4j.event.Level)
     	 * @param level the log level, may be either Level.TRACE, Level.DEBUG,
     	 * Level.INFO, Level.WARN, or Level.ERROR
@@ -448,9 +474,10 @@ public class LoggingHelper {
     	 */
     	public void log(String format, Object ... values ) {
     		if( this.checkLevel(LoggingHelper.consoleLogger) ){
-    			this.logX( String.format(format, values));
+    			this.logX( String.format(format, values) );
     		}
     	}
+
 
     	/**
     	 * log (print) a message text
@@ -458,7 +485,6 @@ public class LoggingHelper {
     	 * <b>Note: this method should be replaced by {@link } due to performance reasons</b>
     	 */
     	private void logX(String messageText) {
-    		// REFACTOR: simplify the logging, only LoggingHelper.consoleLogger is used
     		this.logMessage(LoggingHelper.consoleLogger, messageText);
     	}
 
@@ -467,7 +493,7 @@ public class LoggingHelper {
     	 * @param logger
     	 * @param messageText
     	 */
-    	private void logMessage(Logger logger, String messageText) {
+        private void logMessage(Logger logger, String messageText) {
 
         	this.messageText = ( messageText == null || messageText.isEmpty() ? "-- no message --" : messageText);
 
@@ -538,12 +564,11 @@ public class LoggingHelper {
 	        	default -> throw new IllegalArgumentException("Unexpected value: " + this.currentLevel);
         	}
 			this.logMessage(logger, this.currentLevel, resultingMessage);
-
             MDC.clear();
         }
 
 		private void logMessage(Logger logger, Level level, String message) {
-        	String border = "";
+			String border = "";
    			if( this.printBorder ) {
    				int msgLen = message.length();
    	        	switch (this.currentLevel) {
@@ -567,7 +592,7 @@ public class LoggingHelper {
 						logger.info(border);
 					}
         			else{
-        				logger.info(message);
+						logger.info(message);
 					}
         		}
         		case WARN -> {
