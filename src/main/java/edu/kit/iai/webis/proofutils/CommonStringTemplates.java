@@ -43,6 +43,8 @@ public class CommonStringTemplates {
     public final static String COULD_NOT_SAVE_ELEMENT_WITH_ID = "could not save the %s with id '%s'. Reason: %s";
     public final static String WRONG_EXECUTION_ID_EXPECTED_ID = "wrong execution id '%s' (expected id: %s)!";
 
-    public static final String EXECUTION_ID_PLACEHOLDER = "%EXEC_ID";
+    public static final String PLACEHOLDER_EXECUTION_ID = "%EXEC_ID";
+    public static final String PLACEHOLDER_EXECUTION_LABEL = "%EXEC_LABEL";
+    public static final String PLACEHOLDER_EXECUTION_DATE = "%EXEC_DATE";
 
 }
