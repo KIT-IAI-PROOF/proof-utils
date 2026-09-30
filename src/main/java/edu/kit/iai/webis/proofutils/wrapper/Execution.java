@@ -71,6 +71,14 @@ public class Execution implements IWrapper<ExecutionDetail> {
 		return EnumMapper.getSimulationStatusFor(this.executionDetail.getStatus());
 	}
 
+	public String getStartedAt() {
+		return this.executionDetail.getStartedAt();
+	}
+
+	public String getStoppedAt() {
+		return this.executionDetail.getStoppedAt();
+	}
+
 	public int getCommunicationPoint() {
 		return this.executionDetail.getCurrentCP();
 	}
