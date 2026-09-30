@@ -45,6 +45,5 @@ public class CommonStringTemplates {
 
     public static final String PLACEHOLDER_EXECUTION_ID = "%EXEC_ID";
     public static final String PLACEHOLDER_EXECUTION_LABEL = "%EXEC_LABEL";
-    public static final String PLACEHOLDER_EXECUTION_DATE = "%EXEC_DATE";
 
 }
