@@ -154,7 +154,7 @@ public class DateTimeHelper {
 				// System.err.println("Missing precise time information. Time is set to 0 a.m.");
 				localDateTime = LocalDate.parse(date, formatter).atStartOfDay();
 			} catch (DateTimeParseException e2) {
-				// REFACTOR: we need some kind of notification of the user here
+				// TODO: REFACTOR: we need some kind of notification of the user here
 				// System.err.println("Provided date and format can not be matched with each other.");
 				try {
 					return ZonedDateTime.parse(date, formatter);

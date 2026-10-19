@@ -5,8 +5,6 @@
 package edu.kit.iai.webis.proofutils;
 
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +23,7 @@ import edu.kit.iai.webis.proofutils.message.SyncMessage;
 import edu.kit.iai.webis.proofutils.message.ValueMessage;
 import edu.kit.iai.webis.proofutils.model.SimulationPhase;
 
+import org.slf4j.spi.LocationAwareLogger;
 
 /**
  * Helper class for logging messages.
@@ -33,19 +32,23 @@ import edu.kit.iai.webis.proofutils.model.SimulationPhase;
  * The LoggingHelpper uses the slf4j2 package that is realized by the logback package. This means, that the configuration can be made by a logback.xml file.
  */
 @Component
-public class LoggingHelper {
+public class LoggingHelper{
 
-    private static final Logger consoleLogger = LoggerFactory.getLogger("ConsoleLogger");
+    private static final Logger consoleLogger = LoggerFactory.getLogger("LoggingHelper");
 
     static {
     	((ch.qos.logback.classic.Logger)consoleLogger).setLevel(ch.qos.logback.classic.Level.INFO);
     }
 
-    private static final Logger eventLogger = LoggerFactory.getLogger("EventLogger");
+    private static Level logLevel = Level.INFO;
+    
+//    private static final Logger eventLogger = LoggerFactory.getLogger("EventLogger");
 
     private static boolean logSourcePosition = false;
     private static boolean printColor = true;
     private static final String MDC_SIMPLIFIED_FORMAT = "simplifiedFormat";
+    private final static char CRLF = '\n';
+    private final static int DEFAULT_MSG_LENGTH = 512;  // used for the capacity of the used StringBuilder. If it is too short, SB extends its capacity automatically
 
     /**
      * Log an info message
@@ -158,7 +161,7 @@ public class LoggingHelper {
     	if( consoleLogger instanceof ch.qos.logback.classic.Logger qosLogger) {
     		ch.qos.logback.classic.Level qosLevel = ch.qos.logback.classic.Level.convertAnSLF4JLevel(level);
     		((ch.qos.logback.classic.Logger)consoleLogger).setLevel(qosLevel);
-    		((ch.qos.logback.classic.Logger)eventLogger).setLevel(qosLevel);
+    		logLevel = level;
     		consoleLogger.info( "Level set by program from " + qosLogger.getLevel() + " to " + level + " eventually overriding logback settings ... ");
     		return;
     	}
@@ -189,7 +192,7 @@ public class LoggingHelper {
 		consoleLogger.warn( "Could not determine correct Level number! (Logger is instance of "
 							+ consoleLogger.getClass().getName()
 							+ ") => returning 20 (int value for 'INFO') ... ");
-    	return 20;
+    	return org.slf4j.event.Level.INFO.toInt();
     }
 
     /**
@@ -199,21 +202,7 @@ public class LoggingHelper {
      * @return the name (String) of the current {@link ch.qos.logback.classic.Level}
      */
     public static String getLogLevel() {
-    	// both loggers have the same class definition
-    	if( consoleLogger instanceof ch.qos.logback.classic.Logger qosLogger) {
-    		ch.qos.logback.classic.Level lvl = qosLogger.getLevel();
-    		if( lvl != null ) {
-				return lvl.toString();
-			}
-    		else {
-    			consoleLogger.warn( "Given Logger has no LOG Level set!" );
-    			return "unknown";
-    		}
-    	}
-    	consoleLogger.warn( "Could not determine correct LOG Level! (Logger is instance of "
-    			+ consoleLogger.getClass().getName()
-    			+ ") => returning 'unknown' ... ");
-    	return "unknown";
+    	return logLevel.name();
     }
 
     /**
@@ -262,7 +251,7 @@ public class LoggingHelper {
     /**
      * the builder class
      */
-    public final static class LogBuilder{
+    public final static class LogBuilder {
     	private Level currentLevel = null;
     	private String messageText = null;
     	private String workflowId = null;
@@ -275,11 +264,13 @@ public class LoggingHelper {
     	private boolean printWithColor = printColor;
     	private boolean printStackTrace = false;
 		private boolean printBorder = false;
-    	private String ColBlue = Colors.ANSI_BLUE.value();
-    	private String ColRed = Colors.ANSI_RED.value();
-		private String ColReset = Colors.ANSI_RESET.value();
+    	private String ColBlue = "";
+    	private String ColPurple = "";
+    	private String ColRed = "";
+		private String ColReset = "";
 		private String ColMsg = ""; //Colors.ANSI_BLACK.value();
     	private Exception exception;
+		private Exception logEx = null;
     	private IMessage messageObject;
 
 		/**
@@ -412,6 +403,15 @@ public class LoggingHelper {
     	}
 
     	/**
+    	 * Print the stack trace of the thread (see {@link this#getStackTrace()})
+    	 * @return the builder instance for further use
+    	 */
+    	public LogBuilder printStackTrace() {
+    		this.printStackTrace = true;
+    		return this;
+    	}
+
+    	/**
     	 * print a message with a given color from the color table. <br>
     	 * Note: The attribute {@link #printColored} must not be set to false.
     	 * @param messageColor the desired {@link Colors}
@@ -440,30 +440,10 @@ public class LoggingHelper {
     	private final static String MDC_EXECUTION_ID = "executionId";
 
     	/**
-    	 * finally log the message. This method is the finalizer method for the builder instance.
-    	 * @param messageText the message text
+    	 * check whether the message for the given level should be printed 
     	 */
-
-		private boolean checkLevel(Logger logger) {
-
-			switch (this.currentLevel) {
-				case INFO -> {
-					return logger.isInfoEnabled();
-				}
-				case WARN -> {
-					return logger.isWarnEnabled();
-				}
-				case ERROR -> {
-					return logger.isErrorEnabled();
-				}
-				case DEBUG -> {
-					return logger.isDebugEnabled();
-				}
-				case TRACE -> {
-					return logger.isTraceEnabled();
-				}
-				default -> throw new IllegalArgumentException("Unsupported log level: " + this.currentLevel);
-				}
+		private boolean checkLevel() {
+			return this.currentLevel.toInt() >= logLevel.toInt();
 		}
 
     	/**
@@ -473,36 +453,26 @@ public class LoggingHelper {
      	 * @param values a list of values
     	 */
     	public void log(String format, Object ... values ) {
-    		if( this.checkLevel(LoggingHelper.consoleLogger) ){
-    			this.logX( String.format(format, values) );
+    		if( this.checkLevel() ){
+    			this.logMessage( LoggingHelper.consoleLogger, String.format(format, values) );
     		}
-    	}
-
-
-    	/**
-    	 * log (print) a message text
-    	 * @param messageText the message text
-    	 * <b>Note: this method should be replaced by {@link } due to performance reasons</b>
-    	 */
-    	private void logX(String messageText) {
-    		this.logMessage(LoggingHelper.consoleLogger, messageText);
     	}
 
     	/**
     	 * pure logging of the message
-    	 * @param logger
-    	 * @param messageText
+    	 * @param logger (still present to ensure flexibility in future)
+    	 * @param pureMessageText
     	 */
-        private void logMessage(Logger logger, String messageText) {
-
-        	this.messageText = ( messageText == null || messageText.isEmpty() ? "-- no message --" : messageText);
-
+        private void logMessage(Logger logger, String pureMessageText) {
+        	
+        	this.messageText = ( pureMessageText == null || pureMessageText.isEmpty() ? "-- no message --" : pureMessageText);
+			
 			// reset colors if no colored output is desired
-			if (!this.printWithColor) {
-				this.ColBlue = "";
-				this.ColRed = "";
-				this.ColReset = "";
-//				this.ColMsg = "";
+			if ( this.printWithColor) {
+				this.ColBlue = Colors.ANSI_BLUE.value();
+				this.ColPurple = Colors.ANSI_PURPLE.value();
+		    	this.ColRed = Colors.ANSI_RED.value();
+		    	this.ColReset = Colors.ANSI_RESET.value();
         	}
 
         	if( this.messageObject != null ) {
@@ -549,113 +519,117 @@ public class LoggingHelper {
         		});
         	}
 
+        	String resultingMessage = switch (this.currentLevel) {
+	        	case INFO -> this.messageText;
+				// Print stacktrace and exception message optionally. 
+				case WARN, DEBUG, TRACE -> this.messageText + this.createExceptionLog(this.printStackTrace);
+				// Print stacktrace always and exception message if available.
+	        	case ERROR -> this.messageText + this.createExceptionLog(true);
+	        	default -> "";
+        	};
+        	resultingMessage = this.enrichMessage(logger, this.currentLevel, resultingMessage);
+        	Exception logEx = this.logEx;
 
-        	String resultingMessage = "";
-        	switch (this.currentLevel) {
-	        	case INFO, WARN -> {
-					resultingMessage = this.ColMsg + this.messageText + this.ColReset;
-	        	}
-	        	case ERROR -> {
-					resultingMessage = this.ColBlue + this.getStackTrace() + this.ColRed + this.messageText + this.createExceptionLog() + this.ColReset;
-	        	}
-	        	case DEBUG, TRACE -> {
-	        		resultingMessage = this.ColBlue + this.getStackTrace() + this.ColMsg + this.messageText + this.createExceptionLog() + this.ColReset;
-	        	}
-	        	default -> throw new IllegalArgumentException("Unexpected value: " + this.currentLevel);
-        	}
-			this.logMessage(logger, this.currentLevel, resultingMessage);
+            if ( logger instanceof LocationAwareLogger law ) {
+                int levelInt = switch ( this.currentLevel ) {
+                    case TRACE -> LocationAwareLogger.TRACE_INT;
+                    case DEBUG -> LocationAwareLogger.DEBUG_INT;
+                    case INFO  -> LocationAwareLogger.INFO_INT;
+                    case WARN  -> LocationAwareLogger.WARN_INT;
+                    case ERROR -> LocationAwareLogger.ERROR_INT;
+                };
+                // FQCN = die Klasse, in der der eigentliche Log-Aufruf steht (hier: die innere LogBuilder-Klasse).
+                // Logback überspringt beim Stack-Walk alle Frames dieser Klasse und nimmt den Frame direkt darüber
+                // als "echten" Aufrufer für %C / %M / %L.
+                law.log( null, LoggingHelper.LogBuilder.class.getName(), levelInt, resultingMessage, null, logEx );
+            } else {
+                // Fallback, falls der Logger kein LocationAwareLogger ist (z.B. NOPLogger in Tests)
+                switch ( this.currentLevel ) {
+                    case TRACE -> logger.trace( resultingMessage, logEx );
+                    case DEBUG -> logger.debug( resultingMessage, logEx );
+                    case INFO  -> logger.info( resultingMessage, logEx );
+                    case WARN  -> logger.warn( resultingMessage, logEx );
+                    case ERROR -> logger.error( resultingMessage, logEx );
+                }
+            }
+        	
+        	
             MDC.clear();
         }
 
-		private void logMessage(Logger logger, Level level, String message) {
-			String border = "";
+		private String enrichMessage(Logger logger, Level level, String message) {
+			char[] border = new char[]{' '};
+			int msgLen = message.length();
    			if( this.printBorder ) {
-   				int msgLen = message.length();
-   	        	switch (this.currentLevel) {
-		        	case INFO, WARN -> {
-						msgLen -= (this.ColMsg.length() + this.ColReset.length());
-		        	}
-		        	case ERROR, DEBUG, TRACE-> {
-		        		msgLen -= (2*this.ColMsg.length() + this.ColReset.length());
-		        	}
-   	        	}
-	        	char[] caBorder = new char[msgLen];
-	        	Arrays.fill(caBorder, '-');
-	        	border = new String(caBorder);
+  	        	int borderLength = getMaxLineLength(message);
+	        	border = new char[borderLength];
+	        	Arrays.fill(border, '-');
+	        	msgLen += (2 * borderLength);
    			}
 
-        	switch (level) {
-        		case INFO -> {
-        			if( this.printBorder ) {
-						logger.info(border);
-						logger.info(message);
-						logger.info(border);
-					}
-        			else{
-						logger.info(message);
-					}
-        		}
-        		case WARN -> {
-					if (this.printBorder) {
-						logger.warn(this.ColBlue + border + this.ColReset);
-						logger.warn(message);
-						logger.warn(this.ColBlue + border + this.ColReset);
-					}
-					else{
-						logger.warn(message);
-					}
-        		}
-        		case ERROR -> {
-					if (this.printBorder) {
-						logger.error(this.ColRed + border + this.ColReset);
-						logger.error(message);
-						logger.error(this.ColRed + border + this.ColReset);
-					}
-					else{
-						logger.error(message);
-					}
-        		}
-        		case DEBUG -> {
-					if (this.printBorder) {
-						logger.debug(this.ColBlue + border + this.ColReset);
-						logger.debug(message);
-						logger.debug(this.ColBlue + border + this.ColReset);
-					}
-					else{
-						logger.debug(message);
-					}
-        		}
-        		case TRACE -> {
-        			if (this.printBorder) {
-        				logger.trace(this.ColBlue + border + this.ColReset);
-        				logger.trace(message);
-        				logger.trace(this.ColBlue + border + this.ColReset);
-        			}
-        			else{
-        				logger.trace(message);
-        			}
-        		}
-        	}
+   			StringBuilder sb = new StringBuilder(msgLen > DEFAULT_MSG_LENGTH ? msgLen : DEFAULT_MSG_LENGTH);
+
+  			String levelColor = switch (level) {
+  				case ERROR -> this.ColRed;
+				case WARN -> this.ColPurple;
+  				case INFO, DEBUG, TRACE -> this.ColMsg;
+  				default -> this.ColMsg;
+  			};
+   			sb.append(levelColor );
+   			
+   			if( this.printBorder ) {
+   				sb.append(CRLF).append(border).append(CRLF);
+   			}
+   			sb.append(message);
+   			if( this.printBorder ) {
+   				sb.append(CRLF).append(border).append(CRLF);
+   			}
+   			sb.append(this.ColReset);
+   			return sb.toString();
         }
+
+		
+		private int getMaxLineLength(String message) {
+			char[] msgArray = message.toCharArray();
+			int maxLen = 0;
+			int len = 0;
+			for (int i = 0; i < msgArray.length; i++) {
+				if( msgArray[i] == '\n'  &&  len > maxLen ) {
+					maxLen = len;
+					len = 0;
+				}
+				else if( msgArray[i] == '\t' ) {
+					len += 8;
+				}
+				else {
+					len++;
+				}
+			}
+			return maxLen == 0 ? msgArray.length : maxLen;
+		}
 
         /**
          * create the output for the exception message and its stack trace, if desired
          * @return the exception-dependent text to be logged
          */
-        private String createExceptionLog() {
-			if( this.exception == null ) {
-				return "";
+        private String createExceptionLog(boolean addStackTrace) {
+			String result = "";
+			if( this.exception != null ) {
+				// The stack trace itself is not embedded here: when requested, it is printed once by
+				// the logger via the throwable argument passed to law.log(...) in logMessage().
+				result = " -> " + this.exception.getMessage();
 			}
-			StringJoiner exMsg = new StringJoiner("\n");
-			exMsg.add( " -> " + this.exception.getMessage() );
-
-        	if( this.printStackTrace ) {
-        		StringWriter sw = new StringWriter();
-        		PrintWriter pw = new PrintWriter( sw );
-        		this.exception.printStackTrace( pw );
-        		exMsg.add( sw.toString() );
-        	}
-			return exMsg.toString();
+			if (addStackTrace) {
+				if (this.exception == null) {
+					result += this.getStackTrace();
+				}
+				else {
+					// When a stack trace is requested and exception available, pass the exception.
+					// logback (and SLF4J's (msg, Throwable) overloads) auto-append the trace of any throwable received.
+					this.logEx = this.exception;
+				}
+			}
+			return result;
 		}
 
 		/**
@@ -664,18 +638,20 @@ public class LoggingHelper {
          */
         private String getStackTrace() {
         	if( logSourcePosition ) {
-        		StackTraceElement[] steArray = Thread.currentThread().getStackTrace();
+        		StackTraceElement[] steArray = new Throwable().getStackTrace();
         		int i = 3; // kann mit 3 beginnen, da StackTrace grundsaetzlich mit Thread vor LoggingHelper beginnt und damit kein ArrayOverFlow spaeter...
         		for( ; i < steArray.length ; ++i ){ // ++i: damit i nach verlassen der Schleife nicht veraendert wird
         			if( ! steArray[i].getClassName().startsWith( LoggingHelper.class.getName() )) {
 						break;
 					}
         		}
-        		return "(" + steArray[i].getFileName() + ":" + steArray[ i ].getLineNumber() + ")::"
+        		String sttr = "(" + steArray[i].getFileName() + ":" + steArray[ i ].getLineNumber() + ")::"
         				+ this.ColBlue + steArray[ i ].getMethodName() + ": " + this.ColReset;
+        		return sttr;
         	}
         	return "";
         }
+
     } // class LogBuilder
 
     /**

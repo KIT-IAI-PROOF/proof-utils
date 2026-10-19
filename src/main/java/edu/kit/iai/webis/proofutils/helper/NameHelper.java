@@ -22,6 +22,7 @@ public class NameHelper {
 	public static String getStaticInputsQueueName(String executionID, Block block) {
         return CommonStringTemplates.STATIC_INPUTS_QUEUE_NAME_TEMPLATE.formatted(
                 executionID, block.getId(), block.getIndex());
+//        return getStaticInputsQueueName(block.getId(), block.getIndex());
     }
 
 	/**

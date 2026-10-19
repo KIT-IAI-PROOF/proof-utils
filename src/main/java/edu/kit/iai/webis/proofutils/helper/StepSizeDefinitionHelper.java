@@ -26,6 +26,7 @@ public class StepSizeDefinitionHelper {
 
     private final static Integer DEFAULT_END_POINT = 99;
 
+//    private Integer communicationPoint = 0;
     private Integer endPoint = DEFAULT_END_POINT;
     private Integer startPoint = 1;
 
