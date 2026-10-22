@@ -12,7 +12,7 @@
 	<artifactId>proof-utils</artifactId>
 	<version>1.2.0-dev0</version>
 	<properties>
-		<java.version>21</java.version>
+		<maven.compiler.release>21</maven.compiler.release>
 	</properties>
 	<dependencies>
 		<dependency>
