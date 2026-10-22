@@ -184,7 +184,7 @@ public class StepBasedConfiguration implements IWrapper <StepBasedConfigurationD
 
 	/**
 	 * Get the worker timeout value in seconds.
-	 * @return the worker timeout value, or null if not configured
+	 * @return the worker timeout value, or the default if not configured
 	 */
 	public Long getWorkerTimeout() {
 		Long wto = this.stepBasedConfigurationDetail.getWorkerTimeout();
@@ -192,8 +192,8 @@ public class StepBasedConfiguration implements IWrapper <StepBasedConfigurationD
 	}
 
 	/**
-	 * Get the input timeout value in milliseconds.
-	 * @return the input timeout value, or null if not configured
+	 * Get the input timeout value in seconds.
+	 * @return the input timeout value, or the default if not configured
 	 */
 	public Long getInputTimeout() {
 		Long ito = this.stepBasedConfigurationDetail.getInputTimeout();
