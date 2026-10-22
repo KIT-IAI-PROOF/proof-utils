@@ -68,6 +68,7 @@ public class ConfigManagerService {
 		this.attachmentControllerApi = attachmentControllerApi;
 		this.programControllerApi = programControllerApi;
 		this.executionControllerApi = executionControllerApi;
+		//this.workflowRepository = workflowRepository.orElse(null);
     }
 
 
@@ -115,7 +116,7 @@ public class ConfigManagerService {
 
     		} catch (final Exception e) {
     			throw new DBAccessException(
-    					CommonStringTemplates.COULD_NOT_SAVE_ELEMENT_WITH_ID.formatted("Execution", executionId, e.getMessage()), e);
+    					CommonStringTemplates.COULD_NOT_SAVE_ELEMENT_WITH_ID.formatted("Execution start", executionId, e.getMessage()), e);
     		}
     	}
     	else {
@@ -142,7 +143,7 @@ public class ConfigManagerService {
 
     		} catch (final Exception e) {
     			throw new DBAccessException(
-    					CommonStringTemplates.COULD_NOT_SAVE_ELEMENT_WITH_ID.formatted("Execution", executionId, e.getMessage()), e);
+    					CommonStringTemplates.COULD_NOT_SAVE_ELEMENT_WITH_ID.formatted("Execution status", executionId, e.getMessage()), e);
     		}
     	}
     	else {
@@ -165,7 +166,7 @@ public class ConfigManagerService {
 
 			} catch (final Exception e) {
 				throw new DBAccessException(
-					CommonStringTemplates.COULD_NOT_SAVE_ELEMENT_WITH_ID.formatted("Execution", executionId, e.getMessage()), e);
+					CommonStringTemplates.COULD_NOT_SAVE_ELEMENT_WITH_ID.formatted("Execution CP", executionId, e.getMessage()), e);
 			}
 		}
 		else {
@@ -225,7 +226,7 @@ public class ConfigManagerService {
      */
     public StepBasedConfiguration getStepBasedConfiguration(final String id) throws DBAccessException {
     	try {
-            // REFACTOR: this is a work-around as no stepBasedConfig-ControllerApi exists. This should be refactored as soon as such an API is available.
+            // TODO: REFACTOR: this is a work-around as no stepBasedConfig-ControllerApi exists. This should be refactored as soon as such an API is available.
             if (stepBasedConfigList == null || !stepBasedConfigList.stream().anyMatch(sbc -> sbc.getId().equals(id))) {
                 getStepBasedConfigurations();
             }
@@ -248,7 +249,7 @@ public class ConfigManagerService {
      */
     public List<StepBasedConfiguration> getStepBasedConfigurations() throws DBAccessException {
     	try {
-            // REFACTOR: this is a work-around as no stepBasedConfig-ControllerApi exists. This should be refactored as soon as such an API is available.
+            // TODO: REFACTOR: this is a work-around as no stepBasedConfig-ControllerApi exists. This should be refactored as soon as such an API is available.
             // Loop over all workflows and extract step based configs and store in internal list.
 			List<Workflow> workflows = getWorkflows();
             // Update the internal list and return the step based configs.

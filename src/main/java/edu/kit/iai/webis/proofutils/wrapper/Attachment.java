@@ -17,7 +17,9 @@ public class Attachment implements IWrapper<AttachmentDetail> {
 	}
 
 	@Override
-	public AttachmentDetail getWrappedClass() {	return this.attachmentDetail; }
+	public AttachmentDetail getWrappedClass() {
+		return this.attachmentDetail;
+	}
 
 	public String getDescription() {
 		return this.attachmentDetail.getDescription();
