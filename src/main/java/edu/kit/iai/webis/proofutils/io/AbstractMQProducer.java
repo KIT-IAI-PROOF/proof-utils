@@ -5,7 +5,6 @@
 package edu.kit.iai.webis.proofutils.io;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 
 import edu.kit.iai.webis.proofutils.LoggingHelper;
 import edu.kit.iai.webis.proofutils.message.IMessage;
@@ -20,7 +19,7 @@ public abstract class AbstractMQProducer {
      */
     protected AbstractMQProducer(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
-        this.rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        this.rabbitTemplate.setMessageConverter(ProofMessageConverter.create());
     }
 
     /**
