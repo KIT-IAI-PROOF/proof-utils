@@ -97,7 +97,7 @@ public abstract class IOElement {
 
 	/**
 	 * {@link Integer} that represents the phase of the step of the input/output
-	 * element (see {@link WorkflowPhase}).
+	 * element (see {@link SimulationPhase}).
 	 */
 	private SimulationPhase phase;
 
@@ -219,7 +219,7 @@ public abstract class IOElement {
 
 	/**
 	 * set optional additional meta data
-	 * @param the additional meta data
+	 * @param metadata the additional meta data
 	 */
 	public void setMetadata(Map<String, Object> metadata) {
 		this.metadata = metadata;

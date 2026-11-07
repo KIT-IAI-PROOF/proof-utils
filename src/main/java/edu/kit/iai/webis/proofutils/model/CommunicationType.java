@@ -4,11 +4,13 @@
  */
 package edu.kit.iai.webis.proofutils.model;
 
+import edu.kit.iai.webis.proofutils.wrapper.IOElement;
+
 /**
  * Type of communication for {@link IOElement}s.
  * Communication types are used to define the type of communication between two blocks.
  * A CommunicationType is dependent on the {@link CommunicationParadigm}.
- * Values may be {@link STEPBASED}, {@link EVENT}, {@link EVENT_STATIC} or {@link STEPBASED_STATIC}
+ * Values may be {@link #STEPBASED}, {@link #EVENT}, {@link #EVENT_STATIC} or {@link #STEPBASED_STATIC}
  */
 @SuppressWarnings("unused")
 public enum CommunicationType {
