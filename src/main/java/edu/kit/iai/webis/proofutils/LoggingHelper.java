@@ -159,7 +159,7 @@ public class LoggingHelper{
     private static void setLoggingLevel( Level level ) {
     	// both loggers have the same class definition
     	if( consoleLogger instanceof ch.qos.logback.classic.Logger qosLogger) {
-    		ch.qos.logback.classic.Level qosLevel = ch.qos.logback.classic.Level.convertAnSLF4JLevel(level);
+    		ch.qos.logback.classic.Level qosLevel = ch.qos.logback.classic.Level.toLevel(level.toInt());
     		((ch.qos.logback.classic.Logger)consoleLogger).setLevel(qosLevel);
     		logLevel = level;
     		consoleLogger.info( "Level set by program from " + qosLogger.getLevel() + " to " + level + " eventually overriding logback settings ... ");
@@ -403,7 +403,7 @@ public class LoggingHelper{
     	}
 
     	/**
-    	 * Print the stack trace of the thread (see {@link this#getStackTrace()})
+    	 * Print the stack trace of the thread (see {@link #getStackTrace()})
     	 * @return the builder instance for further use
     	 */
     	public LogBuilder printStackTrace() {
@@ -714,8 +714,7 @@ public class LoggingHelper{
     /**
      * log the Contents of a given Map (Keys and Values) for the debug level.
      *
-     * @param map the Map
-     * @param header an optional header that will be printed
+     * @param list the list
      */
     public static <K> String getListContentsAsString( List<K> list ) {
 		if( list != null ) {
@@ -731,8 +730,7 @@ public class LoggingHelper{
     /**
      * log the Contents of a given Map (Keys and Values) for the debug level.
      *
-     * @param map the Map
-     * @param header an optional header that will be printed
+     * @param set the set
      */
     public static <K> String getSetContentsAsString( Set<K> set ) {
     	if( set != null ) {

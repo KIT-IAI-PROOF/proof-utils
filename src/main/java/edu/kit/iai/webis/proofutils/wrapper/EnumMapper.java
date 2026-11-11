@@ -184,7 +184,7 @@ public class EnumMapper {
 
     /**
      * get the {@link ProcessEnvironment} for a ProcessEnvironment defined in ExecutionDetail
-     * @param re the ProcessEnvironment defined in ExecutionDetail
+     * @param pee the ProcessEnvironment defined in ExecutionDetail
      * @return the corresponding {@link ProcessEnvironment}. Default is {@link ProcessEnvironment#DOCKER}
      */
     public static ProcessEnvironment getProcessEnvironmentFor( ExecutionDetail.ProcessEnvironmentEnum pee ) {

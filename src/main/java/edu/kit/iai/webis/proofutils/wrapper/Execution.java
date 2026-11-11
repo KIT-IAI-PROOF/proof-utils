@@ -102,7 +102,6 @@ public class Execution implements IWrapper<ExecutionDetail> {
 	/**
 	 * Get the {@link InterfaceType} for the execution
 	 * Possible handling types for the data communication between worker and wrapper.
-	 * Values may be {@link #FILE}, {@link #STDIO}, or {@link #SOCKET}
 	 */
 	public InterfaceType getInterfaceType() {
 		return EnumMapper.getInterfaceTypeFor( this.executionDetail.getInterfaceType() );

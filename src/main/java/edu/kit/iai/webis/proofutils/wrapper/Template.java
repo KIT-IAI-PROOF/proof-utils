@@ -135,7 +135,7 @@ public class Template implements IWrapper<TemplateDetail> {
 
 	/**
 	 * set the interface type
-	 * @param the interface type
+	 * @param interfaceType the interface type
 	 */
 	public void setInterfaceType(InterfaceTypeEnum interfaceType) {
         if (this.templateDetail != null) {

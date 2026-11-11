@@ -54,7 +54,7 @@ public class NameHelper {
      * Return service queue name of notify queue for a given block
      *
      * @param executionID the execution id
-     * @param block the given block
+     * @param blockID the given block
      * @return the notify queue name
      */
     public static String getNotifyQueueName(String executionID, String blockID, Integer index) {

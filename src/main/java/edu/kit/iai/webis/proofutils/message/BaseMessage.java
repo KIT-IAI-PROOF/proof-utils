@@ -111,7 +111,7 @@ public class BaseMessage implements Serializable, Cloneable,  IMessage {
 
     /**
      * set the creation time of the message in long form
-     * @param time the creation time of the message
+     * @param timeInMillis the creation time of the message
      */
     public void setTimeInMillis(Long timeInMillis) {
     	this.timeInMillis = timeInMillis;
