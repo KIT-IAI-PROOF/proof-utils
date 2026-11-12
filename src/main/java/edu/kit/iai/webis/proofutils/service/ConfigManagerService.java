@@ -68,7 +68,6 @@ public class ConfigManagerService {
 		this.attachmentControllerApi = attachmentControllerApi;
 		this.programControllerApi = programControllerApi;
 		this.executionControllerApi = executionControllerApi;
-		//this.workflowRepository = workflowRepository.orElse(null);
     }
 
 
