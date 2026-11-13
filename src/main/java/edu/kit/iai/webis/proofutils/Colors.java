@@ -32,12 +32,18 @@ public enum Colors {
 	ANSI_WHITE_BOLD("\u001B[37;1m");
 
 	private String ansiStr;
+	private int strLen;
 
 	Colors( String colStr ) {
 		this.ansiStr = colStr;
+		this.strLen = colStr.length();
 	}
 
 	public String value() {
 		return this.ansiStr;
+	}
+	
+	public int len() {
+		return this.strLen;
 	}
 }

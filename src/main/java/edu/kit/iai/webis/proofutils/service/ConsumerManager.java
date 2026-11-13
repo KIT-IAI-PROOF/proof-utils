@@ -65,10 +65,20 @@ public class ConsumerManager {
     }
 
     /**
-     * Stop consumer for a specific receiver
+     * Stop AMQP consumers (receivers)
      */
     public void stopConsumers() {
-        this.receivers.values().parallelStream().forEach((SimpleMessageListenerContainer mqReceiver) -> mqReceiver.destroy());
+        this.receivers.values().parallelStream().forEach((SimpleMessageListenerContainer mqReceiver) -> {
+        	try {
+        		LoggingHelper.debug().log( "Receiver '%s' stopped.", mqReceiver);
+        		mqReceiver.stop();
+        		LoggingHelper.debug().log( "shutting down receiver '%s'.", mqReceiver);
+        		mqReceiver.shutdown();
+        		LoggingHelper.debug().log( "Receiver '%s' shut down successfully.", mqReceiver);
+			} catch (Exception e) {
+        		LoggingHelper.error().log( "Error shutting down receiver '%s'.", mqReceiver);
+			}
+        });
 
     }
 }

@@ -14,6 +14,10 @@ import edu.kit.iai.webis.proofmodels.StepSizeDefinitionDetail;
  */
 public class StepBasedConfiguration implements IWrapper <StepBasedConfigurationDetail>{
 
+	private static final Long DEFAULT_INPUT_TIMEOUT = 5L;
+
+	private static final Long DEFAULT_WORKER_TIMEOUT = 10L;
+
 	private StepBasedConfigurationDetail stepBasedConfigurationDetail;
 
 	private Map<String, StepSizeDefinitionDetail> stepSizeDefinitions;
@@ -24,7 +28,7 @@ public class StepBasedConfiguration implements IWrapper <StepBasedConfigurationD
      * The start time defines the start delay in milliseconds,
      * i.e. how many milliseconds should pass before the process starts
      */
-     private Long startTime = 0L;
+    private Long startTime = 0L;
 
     private Long endTime = 1000L;
 
@@ -177,6 +181,25 @@ public class StepBasedConfiguration implements IWrapper <StepBasedConfigurationD
 		Integer dss = this.stepBasedConfigurationDetail.getDefaultStepSize();
 		return dss != null ? dss : this.defaultStepSize;
 	}
+
+	/**
+	 * Get the worker timeout value in seconds.
+	 * @return the worker timeout value, or the default if not configured
+	 */
+	public Long getWorkerTimeout() {
+		Long wto = this.stepBasedConfigurationDetail.getWorkerTimeout();
+		return wto != null ? wto : DEFAULT_WORKER_TIMEOUT;
+	}
+
+	/**
+	 * Get the input timeout value in seconds.
+	 * @return the input timeout value, or the default if not configured
+	 */
+	public Long getInputTimeout() {
+		Long ito = this.stepBasedConfigurationDetail.getInputTimeout();
+		return ito != null ? ito : DEFAULT_INPUT_TIMEOUT;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
