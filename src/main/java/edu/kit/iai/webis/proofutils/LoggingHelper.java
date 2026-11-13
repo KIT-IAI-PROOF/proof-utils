@@ -41,8 +41,6 @@ public class LoggingHelper{
     }
 
     private static Level logLevel = Level.INFO;
-    
-//    private static final Logger eventLogger = LoggerFactory.getLogger("EventLogger");
 
     private static boolean logSourcePosition = false;
     private static boolean printColor = true;

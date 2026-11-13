@@ -88,7 +88,6 @@ public class MessageBuilder {
 				if( this.messageToCopy != null ) {
 					this.copyMessageAttributesTo(baseMsg);
 				}
-//				((SyncMessage) baseMsg).setCommunicationPoint(this.communicationPoint);
 				((SyncMessage) baseMsg).setCommunicationStepSize(this.communicationStepSize);
 			}
 			case NOTIFY -> {
