@@ -8,6 +8,7 @@ import java.util.Map;
 
 import edu.kit.iai.webis.proofmodels.StepBasedConfigurationDetail;
 import edu.kit.iai.webis.proofmodels.StepSizeDefinitionDetail;
+import edu.kit.iai.webis.proofutils.LoggingHelper;
 
 /**
  * Wrapper class to provide a StepBasedConfiguration element stored in the configuration database
@@ -173,8 +174,10 @@ public class StepBasedConfiguration implements IWrapper <StepBasedConfigurationD
 	}
 
 	public Long getDuration() {
-		Long duration = this.stepBasedConfigurationDetail.getDuration();
-		return duration != null ? duration : this.duration;
+		Long userDuration = this.stepBasedConfigurationDetail.getDuration();
+		Long duration = ( userDuration != null && userDuration > 0 ) ? userDuration : this.duration;
+		LoggingHelper.debug().log("User requested duration: " + userDuration + ", using " + duration + " ms");
+		return duration;
     }
 
 	public Integer getDefaultStepSize() {
